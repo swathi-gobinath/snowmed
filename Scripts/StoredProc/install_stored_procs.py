@@ -14,9 +14,15 @@ engine = create_engine(DATABASE_URL)
 
 # Execute in a BEGIN/COMMIT block so DDL is persisted
 with engine.begin() as conn:
-    sql_save = open("Scripts/StoredProc/SaveHospital.sql").read()
-    sql_get = open("Scripts/StoredProc/GetHospital.sql").read()
-    conn.execute(text(sql_save))
-    conn.execute(text(sql_get))
+    sql_files = [
+        "Scripts/StoredProc/SaveHospital.sql",
+        "Scripts/StoredProc/GetHospital.sql",
+        "Scripts/StoredProc/SaveUser.sql",
+        "Scripts/StoredProc/GetUser.sql"
+    ]
+    for sql_file in sql_files:
+        with open(sql_file) as f:
+            sql = f.read()
+            conn.execute(text(sql))
 
 print("Stored procedures installed.")

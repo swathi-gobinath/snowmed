@@ -1,6 +1,6 @@
 from sqlalchemy import Column, BigInteger, String, Text, Boolean, TIMESTAMP, func, ForeignKey, Integer, Date, Numeric
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, BYTEA
 
 Base = declarative_base()
 
@@ -55,6 +55,8 @@ class User(Base):
     gender = Column(String(20))
     is_active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    password= Column(String(50), nullable=False)
+
 
 
 class Doctor(Base):
@@ -73,6 +75,8 @@ class Doctor(Base):
     custom_vocab = Column(JSONB)
     is_active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
+    userid = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    photo = Column(BYTEA)
 
     # Relationships
     hospital = relationship("Hospital", back_populates="doctors")

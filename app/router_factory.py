@@ -131,7 +131,15 @@ def create_crud_router(
         return db_obj
 
     @router.get("/", response_model=list[out_schema])
-    def list_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    def list_items(id: int = None, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+        entity = model.__name__
+        # If id is provided, use the Get<Entity> function if available
+        if id is not None and getattr(db.bind.dialect, "name", "") == "postgresql" and _pg_proc_exists(db, f"Get{entity}"):
+            get_proc = f"Get{entity}"
+            res = db.execute(text(f"SELECT * FROM {get_proc}(CAST(:p_id AS bigint))"), {"p_id": id})
+            rows = res.fetchall()
+            return [dict(row._mapping) for row in rows] if rows else []
+        # Otherwise, return all (optionally paginated)
         return db.query(model).offset(skip).limit(limit).all()
 
     @router.get("/{item_id}", response_model=out_schema)
